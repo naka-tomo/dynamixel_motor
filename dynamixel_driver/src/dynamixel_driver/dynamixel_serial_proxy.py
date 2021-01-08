@@ -44,6 +44,7 @@ __email__ = 'anton@email.arizona.edu'
 
 import math
 import sys
+import os
 import errno
 from collections import deque
 from threading import Thread
@@ -53,6 +54,8 @@ import roslib
 roslib.load_manifest('dynamixel_driver')
 
 import rospy
+
+sys.path.append(os.path.dirname(__file__))
 import dynamixel_io
 from dynamixel_driver.dynamixel_const import *
 
@@ -98,7 +101,7 @@ class SerialProxy():
         try:
             self.dxl_io = dynamixel_io.DynamixelIO(self.port_name, self.baud_rate, self.readback_echo)
             self.__find_motors()
-        except dynamixel_io.SerialOpenError, e:
+        except dynamixel_io.SerialOpenError as e:
             rospy.logfatal(e.message)
             sys.exit(1)
             
@@ -172,7 +175,7 @@ class SerialProxy():
                     break
                     
         if not self.motors:
-            rospy.logfatal('%s: No motors found.' % self.port_namespace)
+            rospy.logfatal('%s: No motors found.' % self.port_namespace )
             sys.exit(1)
             
         counts = defaultdict(int)
@@ -225,18 +228,18 @@ class SerialProxy():
                     if state:
                         motor_states.append(MotorState(**state))
                         if dynamixel_io.exception: raise dynamixel_io.exception
-                except dynamixel_io.FatalErrorCodeError, fece:
+                except dynamixel_io.FatalErrorCodeError as fece:
                     rospy.logerr(fece)
-                except dynamixel_io.NonfatalErrorCodeError, nfece:
+                except dynamixel_io.NonfatalErrorCodeError as nfece:
                     self.error_counts['non_fatal'] += 1
                     rospy.logdebug(nfece)
-                except dynamixel_io.ChecksumError, cse:
+                except dynamixel_io.ChecksumError as cse:
                     self.error_counts['checksum'] += 1
                     rospy.logdebug(cse)
-                except dynamixel_io.DroppedPacketError, dpe:
+                except dynamixel_io.DroppedPacketError as dpe:
                     self.error_counts['dropped'] += 1
                     rospy.logdebug(dpe.message)
-                except OSError, ose:
+                except OSError as ose:
                     if ose.errno != errno.EAGAIN:
                         rospy.logfatal(errno.errorcode[ose.errno])
                         rospy.signal_shutdown(errno.errorcode[ose.errno])

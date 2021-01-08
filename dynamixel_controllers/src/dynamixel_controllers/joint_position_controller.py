@@ -166,7 +166,7 @@ class JointPositionController(JointController):
 
     def process_motor_states(self, state_list):
         if self.running:
-            state = filter(lambda state: state.id == self.motor_id, state_list.motor_states)
+            state = list(filter(lambda state: state.id == self.motor_id, state_list.motor_states))
             if state:
                 state = state[0]
                 self.joint_state.motor_temps = [state.temperature]
